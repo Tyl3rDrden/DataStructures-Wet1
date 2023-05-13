@@ -285,75 +285,13 @@ private:
         }
         node1->m_DataPtr.swap(node2->m_DataPtr);
     }
-    Node* DeleteRecursive(Node* currentNode, const T& value)
+public:
+    
+    AVLTREE(FUNCTOR RightIsBiggerThanLeft): m_RightIsBiggerThanLeft(RightIsBiggerThanLeft) , m_root(SENTINELNODE){};
+    //Creates an empty tree!
+    void printVisual()
     {
-        if (currentNode == nullptr)
-        {
-            throw std::invalid_argument("Element Does not Exist");
-        }
-        if(currentNode->getElementConst() != value)
-        {
-            if (m_RightIsBiggerThanLeft(currentNode->getElementConst(), value))
-            {
-                // Value is in the right subtree
-                currentNode->SetRightNodePtr(DeleteRecursive(currentNode->GetRightNodePtr(), value));
-            }
-            else
-            {
-                // Value is in the left subtree
-                currentNode->SetLeftNodePtr(DeleteRecursive(currentNode->GetLeftNodePtr(), value));
-            }
-
-        }
-        else
-        {
-            // This is the node to be deleted Remove using normal Binary search tree Algrothism
-            if(!(currentNode->GetRightNodePtr()) || !(currentNode->GetLeftNodePtr()))
-            {
-                //A child node doesn't exist
-                return currentNode->GetRightNodePtr() ? currentNode->GetRightNodePtr() : currentNode->GetLeftNodePtr();
-                //Will also return nullptr if no child exists
-            }
-            //Both Nodes Exist
-            Node* minRightSubTreeNode = getMinNode(currentNode->GetRightNodePtr());
-           // std::cout << minRightSubTreeNode->getElementConst() <<"\n";
-            swapElements(currentNode, minRightSubTreeNode);
-            currentNode->SetRightNodePtr(DeleteRecursive(currentNode->GetRightNodePtr(), value));
-        }
-
-
-        // Update height of the current node
-        currentNode->updateHeight();
-
-        // Get the balance factor of this node
-        int balance = currentNode->getBalanceFactor();
-
-        // Check for unbalance and perform rotations
-        // Left Left Case
-        if (balance > 1 && currentNode->GetLeftNodePtr()->getBalanceFactor() >= 0)
-        {
-            return LLrotateByPtr(currentNode);
-        }
-
-        // Left Right Case
-        if (balance > 1 && currentNode->GetLeftNodePtr()->getBalanceFactor() < 0)
-        {
-            return LRrotateByPtr(currentNode);
-        }
-
-        // Right Right Case
-        if (balance < -1 && currentNode->GetRightNodePtr()->getBalanceFactor() <= 0)
-        {
-            return RRrotateByPtr(currentNode);
-        }
-
-        // Right Left Case
-        if (balance < -1 && currentNode->GetRightNodePtr()->getBalanceFactor() > 0)
-        {
-            return RLrotateByPtr(currentNode);
-        }
-
-        return currentNode;
+        printVisualHelper(m_root, 0);
     }
     void printVisualHelper(const Node* node, int depth) const {
         if (node == nullptr || node->getElementPtr() == SENTINELNODE) {
@@ -376,52 +314,11 @@ private:
         // Process the left subtree
         printVisualHelper(node->GetLeftNodePtr(), depth);
     }
-    std::shared_ptr<T> FindRecursive(Node* currentNode, const T& value) 
-    {
-        if (currentNode.getElementPtr() == SENTINELNODE) {
-            return nullptr; // Not found
-        }
 
-        if (m_RightIsBiggerThanLeft(value, currentNode->getElementConst())) {
-            // Go right
-            return FindRecursive(currentNode->GetRightNode(), value);
-        } else if (m_RightIsBiggerThanLeft(currentNode->getElementConst(), value)) {
-            // Go left
-            return FindRecursive(currentNode->GetLeftNode(), value);
-        } else {
-            // Found the value
-            return currentNode->getElementPtr();
-        }
+    void print() const {
+        printInOrder(&m_root);
+        std::cout << std::endl;
     }
-    Node* getMinNode(Node* CurrentNodePtr)
-    {
-        while (CurrentNodePtr->GetLeftNodePtr())
-        {
-            CurrentNodePtr = CurrentNodePtr->GetLeftNodePtr() ;
-        }
-        return CurrentNodePtr;
-        
-
-    }
-    void RecursiveDelete(Node* currentNode)
-    {
-        if (m_root == SENTINELNODE)
-        {
-            return;
-        }
-        RecursiveDelete(currentNode->GetLeftNodePtr());
-        RecursiveDelete(currentNode->GetRightNodePtr());
-        delete currentNode;
-    }
-public:
-    
-    AVLTREE(FUNCTOR RightIsBiggerThanLeft): m_RightIsBiggerThanLeft(RightIsBiggerThanLeft) , m_root(SENTINELNODE){};
-    //Creates an empty tree!
-    void printVisual()
-    {
-        printVisualHelper(m_root, 0);
-    }
-    
     void InsertElement(const std::shared_ptr<T> dataPtr)
     {
         if(!dataPtr.get())
@@ -439,16 +336,60 @@ public:
 
     std::shared_ptr<T> Find(const T& value) 
     {
-        return FindRecursive(m_root, value);
+        return Find(m_root, value);
     }
 
-
-    void RemoveElement(const T& value)
+    std::shared_ptr<T> Find(Node* currentNode, const T& value) 
     {
-        m_root = DeleteRecursive(m_root, value);
+        if (currentNode.getElementPtr() == SENTINELNODE) {
+            return nullptr; // Not found
+        }
+
+        if (m_RightIsBiggerThanLeft(value, currentNode->getElementConst())) {
+            // Go right
+            return Find(currentNode->GetRightNode(), value);
+        } else if (m_RightIsBiggerThanLeft(currentNode->getElementConst(), value)) {
+            // Go left
+            return Find(currentNode->GetLeftNode(), value);
+        } else {
+            // Found the value
+            return currentNode->getElementPtr();
+        }
     }
 
-    
+    Node* getMinNode(Node* CurrentNodePtr)
+    {
+        while (CurrentNodePtr->GetLeftNodePtr())
+        {
+            CurrentNodePtr->GetLeftNodePtr() ;
+        }
+        return CurrentNodePtr;
+        
+
+    }
+    Node* DeleteRecursive(Node* currentNode, const T& value)
+    {
+        if(!currentNode)/odePtr(DeleteRecursive(currentNode->GetRightNodePtr(), value));
+        //Delete the last node
+
+        //Remove this node using regular binary search tree Removal
+        //Balancing Part 
+
+        currentNode->updateHeight();
+        int balanceFactor = currentNode->getBalanceFactor();
+        //Now same as in insert!
+
+
+
+
+
+        
+
+
+
+
+
+    }
 
 
     //const std::shared_ptr<T> getDataPtr(const std::shared_ptr<KEY> key);
@@ -459,6 +400,16 @@ public:
         RecursiveDelete(m_root);
     }
 
+    void RecursiveDelete(Node* currentNode)
+    {
+        if (m_root == SENTINELNODE)
+        {
+            return;
+        }
+        RecursiveDelete(currentNode->GetLeftNodePtr());
+        RecursiveDelete(currentNode->GetRightNodePtr());
+        delete currentNode;
+    }
         //Recursivly dealloc all nodes
 
 
