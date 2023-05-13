@@ -19,7 +19,7 @@ int main() {
     tree.InsertElement(std::make_shared<int>(7));
     tree.InsertElement(std::make_shared<int>(8));
     tree.InsertElement(std::make_shared<int>(9));
-    tree.printVisual();
+    tree.RemoveElement(6);
     //tree.InsertElement(std::make_shared<int>(40));
     return 0;
 }

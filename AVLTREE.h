@@ -1,3 +1,6 @@
+#ifndef AVLTREE_H_
+#define AVLTREE_H_
+
 
 #define SENTINELNODE nullptr
 #define SENTINEL_NODE_HEIHGT -1
@@ -376,21 +379,26 @@ private:
         // Process the left subtree
         printVisualHelper(node->GetLeftNodePtr(), depth);
     }
-    std::shared_ptr<T> FindRecursive(Node* currentNode, const T& value) 
+    Node* FindRecursive(Node* currentNode, const T& value) 
     {
-        if (currentNode.getElementPtr() == SENTINELNODE) {
+        if (!currentNode) {
             return nullptr; // Not found
         }
+        if(currentNode->getElementConst() == value)
+        {
+            return currentNode;
 
-        if (m_RightIsBiggerThanLeft(value, currentNode->getElementConst())) {
+        }
+
+        if (m_RightIsBiggerThanLeft(currentNode->getElementConst(), value))
+        {
             // Go right
-            return FindRecursive(currentNode->GetRightNode(), value);
-        } else if (m_RightIsBiggerThanLeft(currentNode->getElementConst(), value)) {
+            return FindRecursive(currentNode->GetRightNodePtr(), value);
+        }
+        else
+        {
             // Go left
-            return FindRecursive(currentNode->GetLeftNode(), value);
-        } else {
-            // Found the value
-            return currentNode->getElementPtr();
+            return FindRecursive(currentNode->GetLeftNodePtr(), value);
         }
     }
     Node* getMinNode(Node* CurrentNodePtr)
@@ -437,9 +445,12 @@ public:
 
     } //chec/k const place...
 
-    std::shared_ptr<T> Find(const T& value) 
-    {
-        return FindRecursive(m_root, value);
+    const T& Find(const T& value) 
+    {//Has to be const To not destroy structur
+        Node* resultNodePtr =  FindRecursive(m_root, value);
+        const T& result = resultNodePtr->getElementConst();
+        
+        return result;
     }
 
 
@@ -465,3 +476,4 @@ public:
         //We used normal pointers need to recursivly dealloc all Nodes
     
 };
+#endif

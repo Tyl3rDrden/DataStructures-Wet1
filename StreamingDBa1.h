@@ -61,4 +61,15 @@ public:
 	// } </DO-NOT-MODIFY>
 };
 
+
+struct IdCompare {
+	bool RightIdisBiggerThanLeft(int a, int b){
+		if(a == b)
+		{
+			throw std::invalid_argument("Comparing Two Identical Id's");
+		}
+		return a<b;
+	}
+}
+
 #endif // STREAMINGDBA1_H_
