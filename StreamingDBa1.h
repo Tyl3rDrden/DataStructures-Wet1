@@ -16,10 +16,21 @@
 #define STREAMINGDBA1_H_
 
 #include "wet1util.h"
+#include "AVLTREE.h"
+
+//Check with instructor if this is ok!! Adding to prepreocessor
+#include "Movie.h"
+#include "User.h"
+#include "Group.h"
+
 
 class streaming_database {
 private:
 	//
+	AVLTREE<Movie, CompareMovieIDFunctor> m_moviesbyId;
+	AVLTREE<User, CompareUserIDFunctor> m_usersbyId;
+	AVLTREE<Group, CompareGroupIDFunctor> m_groupsbyId;
+
 	// Here you may add anything you want
 	//
 	
@@ -59,17 +70,8 @@ public:
 	output_t<int> get_group_recommendation(int groupId);
 	
 	// } </DO-NOT-MODIFY>
+
 };
 
-
-struct IdCompare {
-	bool RightIdisBiggerThanLeft(int a, int b){
-		if(a == b)
-		{
-			throw std::invalid_argument("Comparing Two Identical Id's");
-		}
-		return a<b;
-	}
-}
 
 #endif // STREAMINGDBA1_H_

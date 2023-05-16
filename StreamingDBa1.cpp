@@ -2,17 +2,54 @@
 
 streaming_database::streaming_database()
 {
+	//Let's make the AVL Tree's need and change them ad hoc 
+	CompareGroupIDFunctor IdMoviecompareFunctor;
+	AVLTREE<Movie, CompareGroupIDFunctor>  m_moviesbyId(IdMoviecompareFunctor);
+
+	CompareGroupIDFunctor IdGroupcompareFunctor;
+	AVLTREE<Group, CompareGroupIDFunctor>  m_groupbyId(IdGroupcompareFunctor);
+
+	CompareUserIDFunctor IdUsercompareFunctor;
+	AVLTREE<User, CompareUserIDFunctor>  m_userbyId(IdUsercompareFunctor);
 	// TODO: Your code goes here
+
+	//More Avl Trees By statistics
 }
 
 streaming_database::~streaming_database()
 {
+	//Just call the destructors of all the avl trees.. 
+
+
 	// TODO: Your code goes here
 }
 
 
 StatusType streaming_database::add_movie(int movieId, Genre genre, int views, bool vipOnly)
 {
+	//Check Arguments:
+	if(movieId <= 0 || genre == Genre::NONE || views <0)
+	{
+		return StatusType::INVALID_INPUT;
+	}
+	//I'd rather check the Id before allocating Nodes.. It's probably going to be faster
+	try
+	{
+		std::shared_ptr<Movie> newMoviePtr = std::make_shared<Movie>(movieId, genre, views, vipOnly);
+		if(!m_moviesbyId.Find(*newMoviePtr))
+		{//Returns NullPtr if cannot find the movie By id !
+			m_moviesbyId.InsertElement(newMoviePtr);
+
+		}
+		else
+		{
+			return StatusType::FAILURE;
+		}
+	} catch (const std::bad_alloc& ex)
+	{
+		//std::cout << "Caught Bad Allocation exception: " << ex.what() << std::endl;
+		return StatusType::ALLOCATION_ERROR;
+	} 
 	// TODO: Your code goes here
 	return StatusType::SUCCESS;
 }

@@ -15,11 +15,12 @@
 #include <exception>
 #include <cassert>
 #include <iostream>
+#include "Wet1Exceptions.h"
 //Public Functions needed for general Use
 #include <queue>
 
 
-template <class T, class FUNCTOR>
+template <class T, class FUNCTOR, class KEY>
 class AVLTREE
 {
 private:
@@ -27,7 +28,7 @@ private:
     {
         friend AVLTREE;
         std::shared_ptr<T> m_DataPtr; // Not const for the assignment operator!
-
+        const KEY* m_key;
         Node* m_leftNode;
         Node* m_rightNode;
         int m_height;
@@ -39,8 +40,13 @@ private:
         public:
             //Creates a general lead node! for general use!
             //No children
-            Node(const std::shared_ptr<T> DataPtr): m_DataPtr(DataPtr) 
+            Node(const std::shared_ptr<T> DataPtr, const KEY* KeyPtr): m_DataPtr(DataPtr),m_key(KeyPtr)
             {
+                if(!KeyPtr || !DataPtr)
+                {
+                    throw std::invalid_argument("Bad Pointers Given");
+
+                }
                 m_leftNode = SENTINELNODE;
                 m_rightNode = SENTINELNODE;
                 m_height = 0;
@@ -48,6 +54,7 @@ private:
             }
             Node(const Node& other):
                 m_DataPtr(other.m_DataPtr),
+                m_key(other.m_key),
                 m_leftNode(other.m_leftNode),
                 m_rightNode(other.m_rightNode),
                 m_height(other.m_height)
@@ -140,6 +147,7 @@ private:
             void printNode() const 
             {
                 std::cout << "Node data: " << *m_DataPtr << std::endl;
+                std::cout << "Key Data: " << *m_key << std::endl;
                 std::cout << "Balance Factor: " << getBalanceFactor() << std::endl;
                 if(m_leftNode != SENTINELNODE) 
                 {
@@ -158,11 +166,16 @@ private:
                     std::cout << "No right child." << std::endl;
                 }
             }
+            const KEY& getKey()
+            {
+                return *m_key;
+            }
 
 
     };
     //
     Node* m_root;
+    int m_count;
     //changed the root to be a pointer to a node that way it is interchangeable
 
     FUNCTOR m_RightIsBiggerThanLeft;
@@ -172,9 +185,8 @@ private:
     {
         //Updating pointers
         Node* newRoot = root->GetLeftNodePtr();
-        root->SetLeftNodePtr(newRoot->GetLeftNodePtr());
+        root->SetLeftNodePtr(newRoot->GetRightNodePtr());
         newRoot->SetRightNodePtr(root);
-
 
         // Updating heights of the nodes
         root->updateHeight();
@@ -182,20 +194,9 @@ private:
 
         return newRoot;
     }
-
-    /*Node* RRrotateByPtr(Node* root)
-    {
-        Node* newRoot = root->m_rightNode;
-        root->m_rightNode = newRoot->m_leftNode;
-        newRoot->m_leftNode = root;
-
-        root->updateHeight();
-        newRoot->updateHeight();
-        return newRoot;
-    }*/
     Node* RRrotateByPtr(Node* root)
     {
-        assert(root->GetRightNodePtr() && (root->GetRightNodePtr())->GetRightNodePtr());
+        assert(root->GetRightNodePtr());
         Node* newRoot = root->GetRightNodePtr();
         root->SetRightNodePtr(newRoot->GetLeftNodePtr());
         newRoot->SetLeftNodePtr(root);
@@ -244,15 +245,15 @@ private:
             // We entered a null node
             return newNodePtr;
         }
-        else if(m_RightIsBiggerThanLeft(currentNodePtr->getElementConst(), newNodePtr->getElementConst()))
+        if(m_RightIsBiggerThanLeft(currentNodePtr->getKey(), newNodePtr->getKey()))
         {
-            // Go right
             currentNodePtr->SetRightNodePtr(Insert(currentNodePtr->GetRightNodePtr(), newNodePtr));
 
         }
         else
         {
             // Go left
+
             currentNodePtr->SetLeftNodePtr(Insert(currentNodePtr->GetLeftNodePtr(), newNodePtr));
         }
         currentNodePtr->updateHeight();
@@ -288,23 +289,23 @@ private:
         }
         node1->m_DataPtr.swap(node2->m_DataPtr);
     }
-    Node* DeleteRecursive(Node* currentNode, const T& value)
+    Node* DeleteRecursive(Node* currentNode, const T& keyValue)
     {
         if (currentNode == nullptr)
         {
-            throw std::invalid_argument("Element Does not Exist");
+            throw DeleteNonexistentElement("Element Does not Exist");
         }
-        if(currentNode->getElementConst() != value)
+        if(currentNode->getKey() != keyValue)
         {
-            if (m_RightIsBiggerThanLeft(currentNode->getElementConst(), value))
+            if (m_RightIsBiggerThanLeft(currentNode->getKey(), keyValue))
             {
                 // Value is in the right subtree
-                currentNode->SetRightNodePtr(DeleteRecursive(currentNode->GetRightNodePtr(), value));
+                currentNode->SetRightNodePtr(DeleteRecursive(currentNode->GetRightNodePtr(), keyValue));
             }
             else
             {
                 // Value is in the left subtree
-                currentNode->SetLeftNodePtr(DeleteRecursive(currentNode->GetLeftNodePtr(), value));
+                currentNode->SetLeftNodePtr(DeleteRecursive(currentNode->GetLeftNodePtr(), keyValue));
             }
 
         }
@@ -321,7 +322,7 @@ private:
             Node* minRightSubTreeNode = getMinNode(currentNode->GetRightNodePtr());
            // std::cout << minRightSubTreeNode->getElementConst() <<"\n";
             swapElements(currentNode, minRightSubTreeNode);
-            currentNode->SetRightNodePtr(DeleteRecursive(currentNode->GetRightNodePtr(), value));
+            currentNode->SetRightNodePtr(DeleteRecursive(currentNode->GetRightNodePtr(), keyValue));
         }
 
 
@@ -374,31 +375,30 @@ private:
         for (int i = 4; i < depth; i++) {
             std::cout << " ";
         }
-        std::cout << node->getElementConst() << std::endl;
+        std::cout << node->getElementConst() << "," << *(node->m_key) <<std::endl;
 
         // Process the left subtree
         printVisualHelper(node->GetLeftNodePtr(), depth);
     }
-    Node* FindRecursive(Node* currentNode, const T& value) 
+    Node* FindRecursive(Node* currentNode, const KEY& keyValue) 
     {
         if (!currentNode) {
             return nullptr; // Not found
         }
-        if(currentNode->getElementConst() == value)
+        if(currentNode->getElementConst() == keyValue)
         {
             return currentNode;
 
         }
-
-        if (m_RightIsBiggerThanLeft(currentNode->getElementConst(), value))
+        if (m_RightIsBiggerThanLeft(currentNode->getKey(), keyValue))
         {
             // Go right
-            return FindRecursive(currentNode->GetRightNodePtr(), value);
+            return FindRecursive(currentNode->GetRightNodePtr(), keyValue);
         }
         else
         {
             // Go left
-            return FindRecursive(currentNode->GetLeftNodePtr(), value);
+            return FindRecursive(currentNode->GetLeftNodePtr(), keyValue);
         }
     }
     Node* getMinNode(Node* CurrentNodePtr)
@@ -423,21 +423,24 @@ private:
     }
 public:
     
-    AVLTREE(FUNCTOR RightIsBiggerThanLeft): m_RightIsBiggerThanLeft(RightIsBiggerThanLeft) , m_root(SENTINELNODE){};
+    AVLTREE(FUNCTOR RightIsBiggerThanLeft): m_RightIsBiggerThanLeft(RightIsBiggerThanLeft) , m_root(SENTINELNODE), m_count(0){};
     //Creates an empty tree!
     void printVisual()
     {
         printVisualHelper(m_root, 0);
     }
     
-    void InsertElement(const std::shared_ptr<T> dataPtr)
+    void InsertElement(std::shared_ptr<T> dataPtr, const KEY* KeyPtr)
     {
-        if(!dataPtr.get())
+        if(!dataPtr.get() || !KeyPtr)
         {
-            throw std::invalid_argument("Null pointer passed to Insert Element");
+            throw std::invalid_argument("Null pointe, r passed to Insert Element");
             //Throw Exception Bad pointer
         }
-        Node* newNodePtr = new Node(dataPtr);
+        m_count++;
+        Node* newNodePtr = new Node(dataPtr, KeyPtr);
+        //newNodePtr->printNode();
+        //std::cout << newNodePtr->getElement() << "  " << newNodePtr->getKey();
         //Creating a Node from our data pointer
             //Node allocated on the heap!
         m_root = Insert(m_root, newNodePtr);
@@ -445,23 +448,30 @@ public:
 
     } //chec/k const place...
 
-    const T& Find(const T& value) 
+    std::shared_ptr<T> Find(const KEY& Keyvalue) 
     {//Has to be const To not destroy structur
-        Node* resultNodePtr =  FindRecursive(m_root, value);
-        const T& result = resultNodePtr->getElementConst();
-        
-        return result;
+        Node* resultNodePtr =  FindRecursive(m_root, Keyvalue);
+        if(resultNodePtr)
+        {
+            return resultNodePtr->getElementPtr();
+        }
+        return nullptr;
     }
 
 
     void RemoveElement(const T& value)
     {
+        m_count--;
         m_root = DeleteRecursive(m_root, value);
     }
 
     
 
-
+    int getSize()
+    {
+        return m_count;
+    }
+    
     //const std::shared_ptr<T> getDataPtr(const std::shared_ptr<KEY> key);
 
     //I think the syntas is correct
