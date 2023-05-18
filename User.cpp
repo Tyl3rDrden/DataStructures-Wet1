@@ -1,10 +1,16 @@
 #include "User.h"
 
 User::User(int id, bool vip)
-    : m_id(id), m_vip(vip) {}
+    : m_id(id), m_vip(vip) 
+    {
+            for (int i = 0; i < NUMOFGENRES; i++)
+            {
+                m_genreViewCount[i] = 0;
+            }
+    }
 
 int User::getId() const
-{
+{   
     return m_id;
 }
 

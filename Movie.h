@@ -11,6 +11,7 @@
 
 class Movie
 {
+public:
     class Statistics
     {
     private:
@@ -43,8 +44,12 @@ public:
 
     Genre getGenre() const;
     void setGenre(Genre genre);
-
-    Statistics getStatistics() const;
+    const int* getMovieIdPtr()
+    {
+        return &m_id;
+    }
+    Statistics& getStatistics();
+    const Statistics* getStatisticsPtr() const;
     void setStatistics(const Statistics& stats);
 };
 
@@ -63,7 +68,18 @@ public:
 				throw std::invalid_argument("Identical Id's");
 			}
             //Implement here the comparison based on statistics!
-			return ;
+            if(a.getStatistics().getRating() != b.getStatistics().getRating())
+            {//Double comparison is a tricky topic .. ask on piazza
+                a.getStatistics().getRating() < b.getStatistics().getRating();
+            }
+            else if(a.getStatistics().getViews() != b.getStatistics().getViews())
+            {
+                return a.getStatistics().getViews() < b.getStatistics().getViews();
+            }
+            else
+            {
+                return a.getId() < b.getId();
+            }
             //Return Right is bigger than left!
 		}
 	};

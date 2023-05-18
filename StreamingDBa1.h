@@ -22,15 +22,16 @@
 #include "Movie.h"
 #include "User.h"
 #include "Group.h"
-
+#define NUMBEROFGENRES 4
 
 class streaming_database {
 private:
-	//
-	AVLTREE<Movie, CompareMovieIDFunctor> m_moviesbyId;
-	AVLTREE<User, CompareUserIDFunctor> m_usersbyId;
-	AVLTREE<Group, CompareGroupIDFunctor> m_groupsbyId;
+	//3 Avl trees by Id
+	AVLTREE<Movie, CompareMovieIDFunctor, int> m_moviesbyId;
+	AVLTREE<User, CompareUserIDFunctor, int> m_usersbyId;
+	AVLTREE<Group, CompareGroupIDFunctor, int> m_groupsbyId;
 
+	AVLTREE<Movie, CompareMovieStatisticsFunctor, Movie::Statistics>* m_GenreAVLtreesPtr;
 	// Here you may add anything you want
 	//
 	

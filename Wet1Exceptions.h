@@ -29,6 +29,17 @@ public:
     }*/
     
 };
+class ElementNotFound : public std::invalid_argument {
+public:
+    explicit ElementNotFound(const std::string& message = "ElementNotFound")
+        : std::invalid_argument(message) {}
+
+    /*const char* what() const noexcept override {
+        //return "InvalidInputException: " + std::string(std::invalid_argument::what());
+        return;
+    }*/
+    
+};
 
 
 

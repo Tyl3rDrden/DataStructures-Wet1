@@ -1,23 +1,32 @@
 #include "StreamingDBa1.h"
+#include "Linkedlist.h"
 
 streaming_database::streaming_database()
 {
 	//Let's make the AVL Tree's need and change them ad hoc 
-	CompareGroupIDFunctor IdMoviecompareFunctor;
-	AVLTREE<Movie, CompareGroupIDFunctor>  m_moviesbyId(IdMoviecompareFunctor);
-
-	CompareGroupIDFunctor IdGroupcompareFunctor;
-	AVLTREE<Group, CompareGroupIDFunctor>  m_groupbyId(IdGroupcompareFunctor);
-
-	CompareUserIDFunctor IdUsercompareFunctor;
-	AVLTREE<User, CompareUserIDFunctor>  m_userbyId(IdUsercompareFunctor);
 	// TODO: Your code goes here
 
+	//Creating Trees of Movies Ranked By Genre!
+	CompareMovieStatisticsFunctor StatsticsMoviecomapreFunctor;
+	
+	//making an array of AVL TREES!
+	AVLTREE<Movie, CompareMovieStatisticsFunctor, int>* movieTreesArray = new AVLTREE<Movie, CompareMovieStatisticsFunctor, int>[NUMBEROFGENRES];
+
+	m_GenreAVLtreesPtr = new AVLTREE<Movie, CompareMovieStatisticsFunctor, Movie::Statistics>[NUMBEROFGENRES];
 	//More Avl Trees By statistics
 }
 
 streaming_database::~streaming_database()
 {
+	for (int i = 0; i < NUMBEROFGENRES; i++)
+	{
+		m_GenreAVLtreesPtr[i].~AVLTREE();
+		//Calling the Destructors
+		/* code */
+	}
+	delete m_GenreAVLtreesPtr;
+
+	
 	//Just call the destructors of all the avl trees.. 
 
 
@@ -35,11 +44,16 @@ StatusType streaming_database::add_movie(int movieId, Genre genre, int views, bo
 	//I'd rather check the Id before allocating Nodes.. It's probably going to be faster
 	try
 	{
-		std::shared_ptr<Movie> newMoviePtr = std::make_shared<Movie>(movieId, genre, views, vipOnly);
-		if(!m_moviesbyId.Find(*newMoviePtr))
-		{//Returns NullPtr if cannot find the movie By id !
-			m_moviesbyId.InsertElement(newMoviePtr);
 
+		if(!m_moviesbyId.ElementInTree(movieId))
+		{//Returns False if cannot find the movie By id !
+			std::shared_ptr<Movie> newMoviePtr = std::make_shared<Movie>(movieId, genre, views, vipOnly);
+			m_moviesbyId.InsertElement(newMoviePtr, newMoviePtr->getMovieIdPtr());
+			int GenreNum = static_cast<int>(genre);
+			//Converting Genre To it's corresponding int
+			std::shared_ptr<Movie> copyPtr(newMoviePtr);
+			//Making a new sharedpointer using hte copy constructor
+			m_GenreAVLtreesPtr[GenreNum].InsertElement(copyPtr, copyPtr->getStatisticsPtr());
 		}
 		else
 		{
@@ -56,6 +70,34 @@ StatusType streaming_database::add_movie(int movieId, Genre genre, int views, bo
 
 StatusType streaming_database::remove_movie(int movieId)
 {
+	if(movieId <= 0)
+	{
+		return StatusType::INVALID_INPUT;
+
+	}
+	else if(!m_moviesbyId.ElementInTree(movieId))
+	{
+		//No movie Exists
+		return StatusType::FAILURE;
+	}
+	try
+	{
+		Movie remMovie  = m_moviesbyId.Find(movieId);
+		m_GenreAVLtreesPtr[static_cast<int>(remMovie.getGenre())].RemoveElement(remMovie.getStatistics());
+		m_moviesbyId.RemoveElement(movieId);
+		/* code */
+	}
+	catch(const std::bad_alloc& e)
+	{
+		//It won't Catch Freeing Errors!
+		return StatusType::ALLOCATION_ERROR;
+	}
+	return StatusType::SUCCESS;
+	
+	//Remove movie from GenreAvlTree
+
+
+	
 	// TODO: Your code goes here
 	return StatusType::SUCCESS;
 }
@@ -104,9 +146,22 @@ StatusType streaming_database::group_watch(int groupId,int movieId)
 
 output_t<int> streaming_database::get_all_movies_count(Genre genre)
 {
-    // TODO: Your code goes here
-    static int i = 0;
-    return (i++==0) ? 11 : 2;
+	int result;
+	try
+	{
+		if(genre != Genre::NONE)
+		{
+			return m_GenreAVLtreesPtr[static_cast<int>(genre)].getSize();
+		}
+		return output_t<int>(m_moviesbyId.getSize()); 
+		//Returns success 
+		/* code */
+	}
+	catch(const std::bad_alloc& e)
+	{
+		return output_t<int>(StatusType::ALLOCATION_ERROR);
+	}
+	
 }
 
 StatusType streaming_database::get_all_movies(Genre genre, int *const output)

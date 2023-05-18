@@ -287,12 +287,18 @@ private:
         {
             throw std::invalid_argument("Null node pointer passed to swapElements");
         }
+        
         node1->m_DataPtr.swap(node2->m_DataPtr);
+        const KEY* tempkey = node2->m_key;
+        node2->m_key = node1->m_key;
+        node1->m_key = tempkey; 
     }
     Node* DeleteRecursive(Node* currentNode, const T& keyValue)
     {
+        //std::cout << "Deleting " << keyValue << "\n"; 
         if (currentNode == nullptr)
         {
+            //std::cout << keyValue << " IS being deleted\n"; 
             throw DeleteNonexistentElement("Element Does not Exist");
         }
         if(currentNode->getKey() != keyValue)
@@ -300,11 +306,13 @@ private:
             if (m_RightIsBiggerThanLeft(currentNode->getKey(), keyValue))
             {
                 // Value is in the right subtree
+                //std::cout <<  "Going right!\n"; 
                 currentNode->SetRightNodePtr(DeleteRecursive(currentNode->GetRightNodePtr(), keyValue));
             }
             else
             {
                 // Value is in the left subtree
+                //std::cout << "Going Left\n";
                 currentNode->SetLeftNodePtr(DeleteRecursive(currentNode->GetLeftNodePtr(), keyValue));
             }
 
@@ -314,8 +322,11 @@ private:
             // This is the node to be deleted Remove using normal Binary search tree Algrothism
             if(!(currentNode->GetRightNodePtr()) || !(currentNode->GetLeftNodePtr()))
             {
+                //std::cout << "Activated"; 
                 //A child node doesn't exist
-                return currentNode->GetRightNodePtr() ? currentNode->GetRightNodePtr() : currentNode->GetLeftNodePtr();
+                Node* newChildNode = currentNode->GetRightNodePtr() ? currentNode->GetRightNodePtr() : currentNode->GetLeftNodePtr();
+                delete currentNode;
+                return newChildNode;
                 //Will also return nullptr if no child exists
             }
             //Both Nodes Exist
@@ -365,7 +376,7 @@ private:
         }
 
         // Increase the depth (indentation)
-        depth += 4;
+        depth += 12;
 
         // Process the right subtree first
         printVisualHelper(node->GetRightNodePtr(), depth);
@@ -385,7 +396,7 @@ private:
         if (!currentNode) {
             return nullptr; // Not found
         }
-        if(currentNode->getElementConst() == keyValue)
+        if(currentNode->getKey() == keyValue)
         {
             return currentNode;
 
@@ -421,9 +432,42 @@ private:
         RecursiveDelete(currentNode->GetRightNodePtr());
         delete currentNode;
     }
+    void FillArrayDescending(Node* currentNode, KEY* &array, int &currentIndex)
+    {
+        if (currentNode == nullptr) {
+            return;
+        }
+
+        // First, process right subtree
+        FillArrayDescending(currentNode->GetRightNodePtr(), array, currentIndex);
+
+        // Then, save current node's key
+        array[currentIndex] = currentNode->getKey();
+        currentIndex++;
+
+        // Finally, process left subtree
+        FillArrayDescending(currentNode->GetLeftNodePtr(), array, currentIndex);
+    }
 public:
-    
-    AVLTREE(FUNCTOR RightIsBiggerThanLeft): m_RightIsBiggerThanLeft(RightIsBiggerThanLeft) , m_root(SENTINELNODE), m_count(0){};
+    KEY* GetKeysDescending()
+    {
+        if (m_count == 0) {
+            return nullptr; // Tree is empty
+        }
+
+        KEY* keysArray = new KEY[m_count]; // Array to store keys
+        int currentIndex = 0; // Starting index
+        FillArrayDescending(m_root, keysArray, currentIndex);
+        return keysArray;
+    }
+    AVLTREE(): m_root(SENTINELNODE), m_count(0)
+    {
+        FUNCTOR RightIsBiggerThanLeft;
+        //Initializes an instance of the Functor
+        m_RightIsBiggerThanLeft = RightIsBiggerThanLeft;
+        
+
+    }
     //Creates an empty tree!
     void printVisual()
     {
@@ -448,24 +492,38 @@ public:
 
     } //chec/k const place...
 
-    std::shared_ptr<T> Find(const KEY& Keyvalue) 
+    T& Find(const KEY& Keyvalue) 
     {//Has to be const To not destroy structur
         Node* resultNodePtr =  FindRecursive(m_root, Keyvalue);
-        if(resultNodePtr)
+        if(!resultNodePtr)
         {
-            return resultNodePtr->getElementPtr();
+            throw ElementNotFound();
         }
-        return nullptr;
+        return resultNodePtr->getElement();
     }
 
 
-    void RemoveElement(const T& value)
+    void RemoveElement(const KEY& value)
     {
         m_count--;
         m_root = DeleteRecursive(m_root, value);
     }
 
-    
+    bool ElementInTree(const KEY& Keyvalue)
+    {
+        try
+        {   //std::cout << "Hello\n"; 
+            Find(Keyvalue);
+        }
+        catch(const ElementNotFound& e)
+        {
+            //std::cout << "Hello"; 
+            return false;
+        }
+        return true;
+        
+
+    }
 
     int getSize()
     {

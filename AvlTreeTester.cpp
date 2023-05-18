@@ -26,22 +26,39 @@ std::vector<int> generatePermutation(int N) {
     return v;
 }
 int main() {
-    GreaterThan gt;
     int N = 10;
     std::vector<int> permuation  = generatePermutation(N);
     int* arr = permuation.data();
-    AVLTREE<int, GreaterThan, int> tree(gt);
+    AVLTREE<int, GreaterThan, int> tree;
     int one = 1, two =2, three =3;
     for (int i = 0; i < N; i++)
     {
         tree.InsertElement(std::make_shared<int>(i), arr + i);
     }
-    /*permuation  = generatePermutation(N);
-    for (int i = 0; i < N-100; i++)
+    //tree.printVisual();
+    std::cout << "________________________";
+    std::vector<int> permuation1  = generatePermutation(N);
+    /*for (int i = 0; i < 99996 ;i++)
     {
-        tree.RemoveElement(permuation[i]);
+        //std::cout << permuation1[i] << " \n"; 
+        tree.RemoveElement(permuation1[i]);
     }*/
+    //tree.RemoveElement(70);
+    
+
     //std::cout << *(tree.Find(1));
+    //int* arr1 = tree.GetKeysDescending();
+    //for (int i = 0; i < tree.getSize(); i++)
+    //{
+    //    std::cout << arr1[i]<< " ";
+        /* code */
+    //}
+    //delete[] arr1;
+    if(tree.ElementInTree(10))
+    {
+        std::cout << "Found "; 
+
+    }
     tree.printVisual();
     //tree.RemoveElement(2);
     //std::cout << "Tree Didn't Explode";

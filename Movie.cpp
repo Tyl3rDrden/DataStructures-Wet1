@@ -51,11 +51,14 @@ void Movie::setGenre(Genre genre)
     m_genre = genre;
 }
 
-Movie::Statistics Movie::getStatistics() const
+const Movie::Statistics& Movie::getStatistics() const
 {
     return m_statistics;
 }
-
+const Movie::Statistics* Movie::getStatisticsPtr() const
+{
+    return &m_statistics;
+}
 void Movie::setStatistics(const Statistics& stats)
 {
     m_statistics = stats;

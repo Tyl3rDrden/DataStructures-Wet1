@@ -1,6 +1,9 @@
 #ifndef _USER_H
 #define _USER_H
 #include <stdexcept>
+#include "Wet1Exceptions.h"
+
+#define NUMOFGENRES 4
 
 class User
 {
@@ -21,7 +24,7 @@ public:
 	struct CompareUserIDFunctor {
 		bool operator()(const User& a, const User& b) {
 			if (a.getId() == b.getId()) {
-				throw std::invalid_argument("Identical Id's");
+				throw IdAlreadyExists("Identical Id's");
 			}
 			return a.getId() < b.getId();
             //Return Right is bigger than left!
