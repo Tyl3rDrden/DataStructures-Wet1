@@ -85,5 +85,6 @@
     "initializer_list": "cpp",
     "chrono": "cpp",
     "ratio": "cpp"
-  }
+  },
+  "C_Cpp.dimInactiveRegions": false
 }

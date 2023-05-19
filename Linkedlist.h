@@ -3,27 +3,29 @@
 #include <iostream>
 #include <stdexcept>
 
-template <typename T>
-class Node {
-public:
-    T data;
-    Node* next;
 
-    Node(T data) : data(data), next(nullptr) {}
-};
+//Do not use =this linked List!!!!!!
 
-template <typename T>
+
+template <class T>
 class LinkedList {
 private:
-    Node<T>* head;
-    Node<T>* tail;
+    struct Node
+    {
+        T data;
+        Node* next;
+
+        Node(T data) : data(data), next(nullptr) {}
+    };
+    Node* head;
+    Node* tail;
     int length;
 
 public:
     LinkedList() : head(nullptr), tail(nullptr), length(0) {}
     ~LinkedList() {
         while (head) {
-            Node<T>* nextNode = head->next;
+            Node* nextNode = head->next;
             delete head;
             head = nextNode;
         }
@@ -32,7 +34,7 @@ public:
         if (index >= length || index < 0) {
             throw std::invalid_argument("Index out of range.");
         }
-        Node<T>* current = head;
+        Node* current = head;
         for (int i = 0; i < index; i++) {
             current = current->next;
         }
@@ -40,7 +42,7 @@ public:
     }
 
     void append(T data) {
-        Node<T>* newNode = new Node<T>(data);
+        Node* newNode = new Node(data);
         if (!head) {
             head = newNode;
             tail = newNode;
@@ -56,7 +58,7 @@ public:
             throw std::invalid_argument("Index out of range.");
         }
 
-        Node<T>* newNode = new Node<T>(data);
+        Node* newNode = new Node(data);
         if (index == 0) {
             newNode->next = head;
             head = newNode;
@@ -64,7 +66,7 @@ public:
                 tail = newNode;
             }
         } else {
-            Node<T>* prev = head;
+            Node* prev = head;
             for (int i = 0; i < index - 1; i++) {
                 prev = prev->next;
             }
@@ -89,7 +91,7 @@ public:
             head = nullptr;
             tail = nullptr;
         } else {
-            Node<T>* current = head;
+            Node* current = head;
             while (current->next != tail) {
                 current = current->next;
             }
@@ -108,18 +110,18 @@ public:
         }
 
         if (index == 0) {
-            Node<T>* toDelete = head;
+            Node* toDelete = head;
             head = head->next;
             if (head == nullptr) {
                 tail = nullptr;
             }
             delete toDelete;
         } else {
-            Node<T>* prev = head;
+            Node* prev = head;
             for (int i = 0; i < index - 1; i++) {
                 prev = prev->next;
             }
-            Node<T>* toDelete = prev->next;
+            Node* toDelete = prev->next;
             prev->next = toDelete->next;
             if (prev->next == nullptr) {
                 tail = prev;

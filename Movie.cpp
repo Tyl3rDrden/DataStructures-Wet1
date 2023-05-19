@@ -1,7 +1,7 @@
 #include "Movie.h"
 
 Movie::Statistics::Statistics(int views, int id)
-    : m_views(views), m_rating(0.0), m_id(id) {}
+    : m_views(views), m_rating(0.0), m_id(id), m_sumRating(0), m_numeberOfRatings(0) {}
 
 int Movie::Statistics::getViews() const
 {
@@ -18,9 +18,16 @@ double Movie::Statistics::getRating() const
     return m_rating;
 }
 
-void Movie::Statistics::setRating(double rating)
+void Movie::Statistics::addRating(int rating)
 {
-    m_rating = rating;
+    if(rating < 0 || rating > 100)
+    {
+        throw std::invalid_argument("Bad Input Rating");
+    }
+    m_sumRating += rating;
+    m_numeberOfRatings++;
+    m_rating = m_sumRating / m_numeberOfRatings;
+
 }
 int Movie::Statistics::getId() const
 {
@@ -34,7 +41,7 @@ bool Movie::Statistics::operator!=(const Statistics& other) const
 Movie::Movie(int movieId, Genre genre, int views, bool vipOnly)
     : m_id(movieId), m_vipOnly(vipOnly), m_genre(genre), m_statistics(views, movieId) {}
 
-int Movie::getId() const
+const int& Movie::getId() const
 {
     return m_id;
 }

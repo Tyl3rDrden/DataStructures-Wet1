@@ -17,11 +17,10 @@
 
 #include "wet1util.h"
 #include "AVLTREE.h"
-
-//Check with instructor if this is ok!! Adding to prepreocessor
 #include "Movie.h"
 #include "User.h"
 #include "Group.h"
+//Check with instructor if this is ok!! Adding to prepreocessor
 #define NUMBEROFGENRES 4
 
 class streaming_database {
@@ -39,7 +38,7 @@ public:
 	// <DO-NOT-MODIFY> {
 	
 	streaming_database();
-
+	
 	virtual ~streaming_database();
 	
 	StatusType add_movie(int movieId, Genre genre, int views, bool vipOnly);
@@ -71,7 +70,6 @@ public:
 	output_t<int> get_group_recommendation(int groupId);
 	
 	// } </DO-NOT-MODIFY>
-
 };
 
 

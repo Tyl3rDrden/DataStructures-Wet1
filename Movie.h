@@ -18,18 +18,20 @@ public:
     private:
         int m_id;
         int m_views;
-        double m_rating; 
+        double m_rating;
+        int m_sumRating;
+        int m_numeberOfRatings; 
 
     public:
         Statistics(int views, int id)
-    : m_views(views), m_rating(0.0), m_id(id) {}
+    : m_views(views), m_rating(0.0), m_id(id), m_sumRating(0), m_numeberOfRatings(0) {}
 
         int getViews() const;
         void setViews(int views);
         int getId() const;
 
         double getRating() const;
-        void setRating(double rating);
+        void addRating(int rating);
         bool operator!=(const Statistics& other) const; // For my AVL TREE
         //Statistics are differint if their if is differint!
     };
@@ -43,7 +45,7 @@ private:
 public:
     Movie(int movieId, Genre genre, int views, bool vipOnly);
 
-    int getId() const;
+    const int& getId() const;
 
     bool getVipOnly() const;
     void setVipOnly(bool vipOnly);
@@ -84,7 +86,7 @@ public:
             }
             else
             {
-                return a.getId() < b.getId();
+                return a.getId() > b.getId();
             }
             //Return Right is bigger than left!
             //It's never going to get here; 

@@ -1,5 +1,4 @@
 #include "StreamingDBa1.h"
-#include "Linkedlist.h"
 
 streaming_database::streaming_database()
 {
@@ -22,7 +21,6 @@ streaming_database::~streaming_database()
 	{
 		m_GenreAVLtreesPtr[i].~AVLTREE();
 		//Calling the Destructors
-		/* code */
 	}
 	delete m_GenreAVLtreesPtr;
 
@@ -85,7 +83,6 @@ StatusType streaming_database::remove_movie(int movieId)
 		Movie remMovie  = m_moviesbyId.Find(movieId);
 		m_GenreAVLtreesPtr[static_cast<int>(remMovie.getGenre())].RemoveElement(remMovie.getStatistics());
 		m_moviesbyId.RemoveElement(movieId);
-		/* code */
 	}
 	catch(const std::bad_alloc& e)
 	{
@@ -104,25 +101,80 @@ StatusType streaming_database::remove_movie(int movieId)
 
 StatusType streaming_database::add_user(int userId, bool isVip)
 {
+	if(userId <= 0)
+	{
+		return StatusType::INVALID_INPUT;
+	}
+	if(m_usersbyId.ElementInTree(userId))
+	{
+		return StatusType::FAILURE;
+	}
+	try
+	{
+		std::shared_ptr<User> newUserPtr = std::make_shared<User>(userId, isVip);
+		m_usersbyId.InsertElement(newUserPtr, &(newUserPtr->getId()));
+		//GetId is suppost to return A refrence Here
+	}
+	catch(const std::bad_alloc& e)
+	{
+		//It won't Catch Freeing Errors!
+		return StatusType::ALLOCATION_ERROR;
+	}
+	//Create using makeshred
+
 	// TODO: Your code goes here
 	return StatusType::SUCCESS;
 }
 
 StatusType streaming_database::remove_user(int userId)
 {
+	if(userId <= 0)
+	{
+		return StatusType::INVALID_INPUT;
+	}
+	if(!m_usersbyId.ElementInTree(userId))
+	{
+		return StatusType::FAILURE;
+	}
+	try
+	{
+		User remUser = m_usersbyId.Find(userId);
+		
+		if(remUser.inGroup())
+		{
+			(remUser.getGroupPtr())->deleteUser(userId);
+			//Remove the user from the group
+		}
+		m_usersbyId.RemoveElement(userId);
+		//GetId is suppost to return A refrence Here
+	}
+	catch(const std::bad_alloc& e)
+	{
+		//It won't Catch Freeing Errors!
+		return StatusType::ALLOCATION_ERROR;
+	}
+	return StatusType::SUCCESS;
+	//Check is user is part of a group.
+
+
 	// TODO: Your code goes here
 	return StatusType::SUCCESS;
 }
 
 StatusType streaming_database::add_group(int groupId)
 {
+	if(groupId <= 0)
+	{
+		return StatusType::INVALID_INPUT;
+	}
+	//Easy
 	// TODO: Your code goes here
 	return StatusType::SUCCESS;
 }
 
 StatusType streaming_database::remove_group(int groupId)
 {
-	// TODO: Your code goes here
+	//Just Remove it from the tree!
 	return StatusType::SUCCESS;
 }
 
@@ -155,7 +207,6 @@ output_t<int> streaming_database::get_all_movies_count(Genre genre)
 		}
 		return output_t<int>(m_moviesbyId.getSize()); 
 		//Returns success 
-		/* code */
 	}
 	catch(const std::bad_alloc& e)
 	{
@@ -190,5 +241,3 @@ output_t<int> streaming_database::get_group_recommendation(int groupId)
     static int i = 0;
     return (i++==0) ? 11 : 2;
 }
-
-

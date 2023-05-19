@@ -39,7 +39,7 @@ void Group::setVip(bool vip) {
     m_vip = vip;
 }
 
-int Group::getGenreViewCount(Genre genre)
+int Group::getGenreViewCount(Genre genre) const
 {
     if(genre != Genre::NONE)
     {
@@ -56,20 +56,45 @@ int Group::getGenreViewCount(Genre genre)
     }
 }
 
-void Group::addUser(const std::shared_ptr<User>& user)
+void Group::addUser(const std::shared_ptr<User> user)
 {
-    if(user.isVip())
+    if(user->inGroup())
     {
-        m_vip = true;
-        //We are now a vip group
+        if(user->isVip())
+        {
+            m_vip = true;
+            //We are now a vip group
+        }
+        std::shared_ptr<User> shredptr(user);
+        m_users.InsertElement(user, &(user->getId()));
+        user->joinGroup(this);
+        
+        
     }
-    std::shared_ptr<User> shredptr(user);
-    m_users.InsertElement(user, &((*user).getId()));
-    user.m_groupPtr = this;
-    //I'm goin to get so many bugS!!!!!
-    for (int i = 0; i < NUMOFGENRES; i++)
+    else
     {
-        user.m_preGroupViewCount[i] = m_genreViewCount[i];
+        throw std::invalid_argument("Adding user to group twice!");
     }
+
+}
+void Group::deleteUser(int userId)
+{
+    if(!m_users.ElementInTree(userId))
+    {
+        throw std::runtime_error("User not it group Can't be deleted");
+    }
+    m_users.RemoveElement(userId);
+
+}
+
+Group::~Group()
+{
+    //Its probably better to do it with an iterator!
+    int* UsersIngroupId = m_users.GetKeysDescending();
+    for (int i = 0; i < m_users.getSize(); i++)
+    {
+        m_users.Find(UsersIngroupId[i]).groupTerminated();
+    }
+    delete[] m_genreViewCount;
     
 }

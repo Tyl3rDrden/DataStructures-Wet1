@@ -10,14 +10,9 @@ User::User(int id, bool vip) : m_groupPtr(nullptr)
             }
     }
 
-int User::getId() const
+const int& User::getId() const
 {   
     return m_id;
-}
-
-void User::setId(int id)
-{
-    m_id = id;
 }
 
 bool User::isVip() const
@@ -46,7 +41,7 @@ bool User::inGroup()
 {
     return (m_groupPtr != nullptr);
 }
-void User::joinGroup(std::shared_ptr<Group> groupPtr)
+void User::joinGroup(Group* groupPtr)
 {
     if(groupPtr)
     {
@@ -62,9 +57,12 @@ void User::joinGroup(std::shared_ptr<Group> groupPtr)
         throw std::invalid_argument("Null Pointer Given to setGroup");
     }
 }
-
-int User::getNumGenreViews(Genre genre)
+int User::getViewsFromGroup(Genre genre)
 {
+    if(genre == Genre::NONE)
+    {
+        throw std::invalid_argument("Only Valid Genres Allowed");
+    }
     int ViewsFromGroup =0;
     int genreNum  = static_cast<int>(genre);
     if(this->inGroup())
@@ -74,7 +72,54 @@ int User::getNumGenreViews(Genre genre)
         //Deducting the join time views 
         ViewsFromGroup -= m_preGroupViewCount[genreNum];
     }
-    return m_genreViewCount[genreNum] + ViewsFromGroup;
+    return ViewsFromGroup;
+
+    
+}
+
+int User::getNumGenreViews(Genre genre)
+{
+    if(genre == Genre::NONE)
+    {
+        throw std::invalid_argument("Only Valid Genres Allowed");
+    }
+    int genreNum  = static_cast<int>(genre);
+    return m_genreViewCount[genreNum] + getViewsFromGroup(genre);
     //Adding personal views to the Group Watched; 
 
+}
+
+void User::groupTerminated()
+{
+    if(!(this->inGroup()))
+    {
+        throw std::runtime_error("Group termiantion called \n even though user isn't part of a group");
+    }
+    //We'll now incrmemnt the number of group views to the number of personal views
+
+    for (int i = 0; i < NUMOFGENRES; i++)
+    {
+        m_genreViewCount[i] += getViewsFromGroup(static_cast<Genre>(i));
+    }
+    //Now setting the preGroupJoin View count to 0
+    for (int i = 0; i < NUMOFGENRES; i++)
+    {
+        m_preGroupViewCount[i] = 0;
+    }
+    //Setting pointer to group to nullptr
+    this->m_groupPtr = nullptr;
+    
+
+
+}
+
+
+Group* User::getGroupPtr()
+{
+    if(m_groupPtr)
+    {
+        return m_groupPtr;
+    }
+    throw std::runtime_error("Asked for nullptr! in user's pointer to group");
+    return nullptr;
 }
