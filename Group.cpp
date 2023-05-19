@@ -1,7 +1,7 @@
 #include "Group.h"
 
 
-Group::Group(int id) : m_id(id), m_vip(false), m_numVipUsers(0) 
+Group::Group(int id) : m_id(id), m_vip(false) 
 {
     for (int i = 0; i < NUMOFGENRES; i++)
     {
@@ -53,7 +53,23 @@ int Group::getGenreViewCount(Genre genre)
             sum+= m_genreViewCount[i];
         }
         return sum;
-        
-
     }
+}
+
+void Group::addUser(const std::shared_ptr<User>& user)
+{
+    if(user.isVip())
+    {
+        m_vip = true;
+        //We are now a vip group
+    }
+    std::shared_ptr<User> shredptr(user);
+    m_users.InsertElement(user, &((*user).getId()));
+    user.m_groupPtr = this;
+    //I'm goin to get so many bugS!!!!!
+    for (int i = 0; i < NUMOFGENRES; i++)
+    {
+        user.m_preGroupViewCount[i] = m_genreViewCount[i];
+    }
+    
 }

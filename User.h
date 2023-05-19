@@ -12,26 +12,28 @@ class Group;
 class User
 {
 private:
+	friend Group;
+	// Makes it alot easier to add and remove Users from the group 
+
     int m_id;
     bool m_vip;
 	int m_genreViewCount[NUMOFGENRES];
 	//This is the personal list of the users watchlist!
 
-	std::shared_ptr<Group> m_groupPtr;
+	const Group* m_groupPtr;
 	int m_preGroupViewCount[NUMOFGENRES];
 	//This is an array of the user's group watchlist at the time he joined
 
 public:
     User(int id, bool vip);
 
-    int getId() const;
-    void setId(int id);
+    const int& getId() const;
 
     bool isVip() const;
     void setVip(bool vip);
 	void incrementViewsbyGenre(Genre genre);
 	bool inGroup();
-	void joinGroup(std::shared_ptr<Group> groupPtr);
+	void joinGroup(const Group* groupPtr);
 	int getNumGenreViews(Genre genre); // Returns the personal number of views
 
 

@@ -13,14 +13,13 @@ class Group
 private:
     int m_id;
     bool m_vip;
-    int m_numVipUsers;
     AVLTREE<User, CompareUserIDFunctor, int> m_users;
     int m_genreViewCount[NUMOFGENRES];
     //I'll need to add some data structure for keeping track of the users
 
 
 public:
-    Group(int id): m_id(id), m_vip(false), m_numVipUsers(0){};
+    Group(int id): m_id(id), m_vip(false){};
 
     int getId() const;
     void setId(int id);
@@ -29,6 +28,8 @@ public:
     void setVip(bool vip);
     void incrementGenreCount(Genre genre);
     int getGenreViewCount(Genre genre);
+
+    void addUser(const std::shared_ptr<User>& user);
 };
 //I can probably make this doing a template.. But i don't want to risk it!
 	struct CompareGroupIDFunctor {

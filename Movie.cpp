@@ -1,7 +1,7 @@
 #include "Movie.h"
 
-Movie::Statistics::Statistics(int views)
-    : m_views(views), m_rating(0.0) {}
+Movie::Statistics::Statistics(int views, int id)
+    : m_views(views), m_rating(0.0), m_id(id) {}
 
 int Movie::Statistics::getViews() const
 {
@@ -22,9 +22,17 @@ void Movie::Statistics::setRating(double rating)
 {
     m_rating = rating;
 }
+int Movie::Statistics::getId() const
+{
+    return m_id;
+}
+bool Movie::Statistics::operator!=(const Statistics& other) const
+{
+    return m_id != other.m_id;
 
+}
 Movie::Movie(int movieId, Genre genre, int views, bool vipOnly)
-    : m_id(movieId), m_vipOnly(vipOnly), m_genre(genre), m_statistics(views) {}
+    : m_id(movieId), m_vipOnly(vipOnly), m_genre(genre), m_statistics(views, movieId) {}
 
 int Movie::getId() const
 {

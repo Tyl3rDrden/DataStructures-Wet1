@@ -293,7 +293,7 @@ private:
         node2->m_key = node1->m_key;
         node1->m_key = tempkey; 
     }
-    Node* DeleteRecursive(Node* currentNode, const T& keyValue)
+    Node* DeleteRecursive(Node* currentNode, const KEY& keyValue)
     {
         //std::cout << "Deleting " << keyValue << "\n"; 
         if (currentNode == nullptr)

@@ -14,18 +14,24 @@ class Movie
 public:
     class Statistics
     {
+        friend Movie;
     private:
+        int m_id;
         int m_views;
         double m_rating; 
 
     public:
-        Statistics(int views = 0);
+        Statistics(int views, int id)
+    : m_views(views), m_rating(0.0), m_id(id) {}
 
         int getViews() const;
         void setViews(int views);
+        int getId() const;
 
         double getRating() const;
         void setRating(double rating);
+        bool operator!=(const Statistics& other) const; // For my AVL TREE
+        //Statistics are differint if their if is differint!
     };
 
 private:
@@ -54,33 +60,36 @@ public:
 };
 
 	struct CompareMovieIDFunctor {
-		bool operator()(const Movie& a, const Movie& b) {
-			if (a.getId() == b.getId()) {
+		bool operator()(const int& a, const int& b) {
+			if (a == b) {
 				throw IdAlreadyExists("Identical Id's");
 			}
-			return a.getId() < b.getId();
+			return a < b;
             //Return Right is bigger than left!
 		}
 	};
     struct CompareMovieStatisticsFunctor {
-		bool operator()(const Movie& a, const Movie& b) {
+		bool operator()(const Movie::Statistics& a, const Movie::Statistics& b) {
 			if (a.getId() == b.getId()) {
 				throw std::invalid_argument("Identical Id's");
 			}
             //Implement here the comparison based on statistics!
-            if(a.getStatistics().getRating() != b.getStatistics().getRating())
+            if(a.getRating() != b.getRating())
             {//Double comparison is a tricky topic .. ask on piazza
-                a.getStatistics().getRating() < b.getStatistics().getRating();
+                a.getRating() < b.getRating();
             }
-            else if(a.getStatistics().getViews() != b.getStatistics().getViews())
+            else if(a.getViews() != b.getViews())
             {
-                return a.getStatistics().getViews() < b.getStatistics().getViews();
+                return a.getViews() < b.getViews();
             }
             else
             {
                 return a.getId() < b.getId();
             }
             //Return Right is bigger than left!
+            //It's never going to get here; 
+            throw std::invalid_argument("Reached Bad place!");
+            return false;
 		}
 	};
 
