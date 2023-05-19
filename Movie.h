@@ -48,7 +48,7 @@ public:
     {
         return &m_id;
     }
-    Statistics& getStatistics();
+    const Statistics& getStatistics() const;
     const Statistics* getStatisticsPtr() const;
     void setStatistics(const Statistics& stats);
 };

@@ -2,9 +2,11 @@
 #define _GROUP_H
 #include <stdexcept>
 #include "Wet1Exceptions.h"
+#include "wet1util.h"
+#include "AVLTREE.h"
 #include "User.h"
 
-#define NUMOFGENRES 4
+class User;
 
 class Group
 {
@@ -25,6 +27,8 @@ public:
 
     bool isVip() const;
     void setVip(bool vip);
+    void incrementGenreCount(Genre genre);
+    int getGenreViewCount(Genre genre);
 };
 //I can probably make this doing a template.. But i don't want to risk it!
 	struct CompareGroupIDFunctor {
