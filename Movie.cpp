@@ -78,3 +78,15 @@ void Movie::setStatistics(const Statistics& stats)
 {
     m_statistics = stats;
 }
+
+void Movie::IncrementViews(int amount)
+{
+    m_statistics.m_views+= amount;
+}
+
+
+void Movie::addRating(int rating)
+{
+    m_statistics.addRating(rating);
+
+}

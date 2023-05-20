@@ -61,7 +61,7 @@ int main() {
     }
     tree.printVisual();
     //tree.RemoveElement(2);
-    //std::cout << "Tree Didn't Explode";
+    std::cout << tree.getMaxElement();
     //tree.InsertElement(std::make_shared<int>(40));
     return 0;
 }

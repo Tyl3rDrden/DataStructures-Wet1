@@ -167,6 +167,23 @@ StatusType streaming_database::add_group(int groupId)
 	{
 		return StatusType::INVALID_INPUT;
 	}
+	if(m_groupsbyId.ElementInTree(groupId))
+	{
+		return StatusType::FAILURE;
+	}
+	try
+	{
+		
+		std::shared_ptr<Group> newGroupPtr = std::make_shared<Group>(groupId);
+		m_groupsbyId.InsertElement(newGroupPtr, &(newGroupPtr->getId()));
+
+		//GetId is suppost to return A refrence Here
+	}
+	catch(const std::bad_alloc& e)
+	{
+		//It won't Catch Freeing Errors!
+		return StatusType::ALLOCATION_ERROR;
+	}
 	//Easy
 	// TODO: Your code goes here
 	return StatusType::SUCCESS;
@@ -174,24 +191,146 @@ StatusType streaming_database::add_group(int groupId)
 
 StatusType streaming_database::remove_group(int groupId)
 {
+	if(groupId <= 0)
+	{
+		return StatusType::INVALID_INPUT;
+	}
+	if(!m_groupsbyId.ElementInTree(groupId))
+	{
+		return StatusType::FAILURE;
+	}
+	try
+	{
+		
+		m_groupsbyId.RemoveElement(groupId);
+		//The rest of the implementation is in the destructor of Group!;
+	}
+	catch(const std::bad_alloc& e)
+	{
+		//It won't Catch Freeing Errors!
+		return StatusType::ALLOCATION_ERROR;
+	}
+	//Easy
+	// TODO: Your code goes here
+	return StatusType::SUCCESS;
 	//Just Remove it from the tree!
 	return StatusType::SUCCESS;
 }
 
 StatusType streaming_database::add_user_to_group(int userId, int groupId)
 {
+	if(groupId <= 0 || userId <= 0)
+	{
+		return StatusType::INVALID_INPUT;
+	}
+	if(!m_groupsbyId.ElementInTree(groupId)  || !m_usersbyId.ElementInTree(userId))
+	{
+		return StatusType::FAILURE;
+	}
+	try
+	{
+		Group group = m_groupsbyId.Find(groupId);
+		std::shared_ptr<User> user = m_usersbyId.FindandGetSharedPtr(userId);
+		if(user->inGroup())
+		{
+			return StatusType::FAILURE;
+		}
+
+		group.addUser(user);
+		
+		//GetId is suppost to return A refrence Here
+	}
+	catch(const std::bad_alloc& e)
+	{
+		//It won't Catch Freeing Errors!
+		return StatusType::ALLOCATION_ERROR;
+	}
+	//Easy
+	// TODO: Your code goes here
+	return StatusType::SUCCESS;
 	// TODO: Your code goes here
     return StatusType::SUCCESS;
 }
 
 StatusType streaming_database::user_watch(int userId, int movieId)
 {
+	if(movieId <= 0 || userId <= 0)
+	{
+		return StatusType::INVALID_INPUT;
+	}
+	if(!m_moviesbyId.ElementInTree(movieId)  || !m_usersbyId.ElementInTree(userId))
+	{
+		return StatusType::FAILURE;
+	}
+	try
+	{
+		std::shared_ptr<Movie> movie = m_moviesbyId.FindandGetSharedPtr(movieId);
+		User user = m_usersbyId.Find(userId);
+		if(!user.isVip() && movie->getVipOnly())
+		{
+			return StatusType::FAILURE;
+		}
+		if(user.inGroup())
+		{
+			(user.getGroupPtr())->incrementSumGenreCount(movie->getGenre());
+			//If user is part of a group then increment the Groups Views!
+		}
+			//User increments His own Counter
+		user.incrementViewsbyGenre(movie->getGenre());
+		//GetId is suppost to return A refrence Here
+
+		//Here we need to increment Movie Views!
+		m_GenreAVLtreesPtr[static_cast<int>(movie->getGenre())].RemoveElement(movie->getStatistics());
+		movie->IncrementViews(1);
+		m_GenreAVLtreesPtr[static_cast<int>(movie->getGenre())].InsertElement(movie, &(movie->getStatistics()));
+		//
+	}
+	catch(const std::bad_alloc& e)
+	{
+		//It won't Catch Freeing Errors!
+		return StatusType::ALLOCATION_ERROR;
+	}
+	//Easy
 	// TODO: Your code goes here
-    return StatusType::SUCCESS;
+	return StatusType::SUCCESS;
+	// TODO: Your code goes here
 }
 
 StatusType streaming_database::group_watch(int groupId,int movieId)
 {
+	if(movieId <= 0 || groupId <= 0)
+	{
+		return StatusType::INVALID_INPUT;
+	}
+	if(!m_moviesbyId.ElementInTree(movieId)  || !m_groupsbyId.ElementInTree(groupId))
+	{
+		return StatusType::FAILURE;
+	}
+	try
+	{
+		std::shared_ptr<Movie> movie = m_moviesbyId.FindandGetSharedPtr(movieId);
+		Group group = m_groupsbyId.Find(groupId);
+		if((!group.isVip() && movie->getVipOnly()) || (group.getSize() == 0))
+		{
+			return StatusType::FAILURE;
+		}
+		group.incrementGenreCount(movie->getGenre());
+		//Increments the number of views of the to the group.
+		m_GenreAVLtreesPtr[static_cast<int>(movie->getGenre())].RemoveElement(movie->getStatistics());
+		movie->IncrementViews(group.getSize());
+		m_GenreAVLtreesPtr[static_cast<int>(movie->getGenre())].InsertElement(movie, &(movie->getStatistics()));
+		
+		//GetId is suppost to return A refrence Here
+	}
+	catch(const std::bad_alloc& e)
+	{
+		//It won't Catch Freeing Errors!
+		return StatusType::ALLOCATION_ERROR;
+	}
+	//Easy
+	// TODO: Your code goes here
+	return StatusType::SUCCESS;
+	// TODO: Your code goes here
 	// TODO: Your code goes here
 	return StatusType::SUCCESS;
 }
@@ -217,27 +356,152 @@ output_t<int> streaming_database::get_all_movies_count(Genre genre)
 
 StatusType streaming_database::get_all_movies(Genre genre, int *const output)
 {
+	if(output == NULL)
+	{
+		return StatusType::INVALID_INPUT;
+	}
+	if(genre != Genre::NONE)
+	{
+		int genreNum = static_cast<int>(genre);
+		if(m_GenreAVLtreesPtr[genreNum].getSize() == 0)
+		{
+			return StatusType::FAILURE;
+		}
+		//int* keysDecending = 
+		for (int i = 0; i < m_GenreAVLtreesPtr[genreNum].getSize(); i++)
+		{
+			/* code */
+		}
+		
+		Movie::Statistics* outputResult = m_GenreAVLtreesPtr[genreNum].GetKeysDescending();
+		//I need to change it when i Get the chance!!!
+		for (int i = 0; i < NUMBEROFGENRES; i++)
+		{
+			output[i] = outputResult->getId();
+		}
+		delete[] outputResult;
+		return StatusType::SUCCESS;
+	
+	}
+	else
+	{
+		//We'll merge Sort Using the Functor For statistics! // Do later
+		//
+
+
+
+
+
+
+
+
+
+	}
     // TODO: Your code goes here
-    output[0] = 4001;
-    output[1] = 4002;
     return StatusType::SUCCESS;
 }
 
 output_t<int> streaming_database::get_num_views(int userId, Genre genre)
 {
 	// TODO: Your code goes here
-	return 2008;
+	if(userId <= 0 || genre == Genre::NONE)
+	{
+		return StatusType::INVALID_INPUT;
+	}
+	if(!m_usersbyId.ElementInTree(userId))
+	{
+		return StatusType::FAILURE;
+	}
+	try
+	{
+		User user = m_usersbyId.Find(userId);
+		return user.getNumGenreViews(genre);
+		//
+	}
+	catch(const std::bad_alloc& e)
+	{
+		//It won't Catch Freeing Errors!
+		return StatusType::ALLOCATION_ERROR;
+	}
+	return StatusType::SUCCESS;
+	
 }
 
 StatusType streaming_database::rate_movie(int userId, int movieId, int rating)
 {
-    // TODO: Your code goes here
-    return StatusType::SUCCESS;
+
+    if(userId <= 0 || movieId <=0 || rating<0 || rating > 100)
+	{
+		return StatusType::INVALID_INPUT;
+	}
+	if(!m_usersbyId.ElementInTree(userId) || !m_moviesbyId.ElementInTree(movieId))
+	{
+		return StatusType::FAILURE;
+	}
+	try
+	{
+		User user = m_usersbyId.Find(userId);
+		std::shared_ptr<Movie> movie = m_moviesbyId.FindandGetSharedPtr(movieId);
+		if(!user.isVip() && movie->getVipOnly())
+		{
+			return StatusType::FAILURE;
+		}
+		m_GenreAVLtreesPtr[static_cast<int>(movie->getGenre())].RemoveElement(movie->getStatistics());
+
+		movie->addRating(rating);
+
+
+
+		m_GenreAVLtreesPtr[static_cast<int>(movie->getGenre())].InsertElement(movie, &(movie->getStatistics()));
+		//
+	}
+	catch(const std::bad_alloc& e)
+	{
+		//It won't Catch Freeing Errors!
+		return StatusType::ALLOCATION_ERROR;
+	}
+	return StatusType::SUCCESS;
 }
 
 output_t<int> streaming_database::get_group_recommendation(int groupId)
 {
+	
+
+    if(groupId)
+	{
+		return StatusType::INVALID_INPUT;
+	}
+	if(!m_groupsbyId.ElementInTree(groupId))
+	{
+		return StatusType::FAILURE;
+	}
+	try
+	{
+		Group group = m_groupsbyId.Find(groupId);
+		int maxGenre=0, MaxGenreNum=0;
+		for (int i = 0; i < NUMBEROFGENRES; i++)
+		{
+			Genre genre = static_cast<Genre>(i);
+			if(group.getGenreViewCount(genre) > maxGenre)
+			{
+				maxGenre = group.getGenreViewCount(genre);
+				MaxGenreNum = i;
+			}
+		}
+		return (m_GenreAVLtreesPtr[MaxGenreNum].getMaxElement()).getId();
+		//Important.. This tree is by ascending Id values!!!
+		
+		//
+	}
+	catch(const std::bad_alloc& e)
+	{
+		//It won't Catch Freeing Errors!
+		return StatusType::ALLOCATION_ERROR;
+	}
+	return StatusType::SUCCESS;
+	//Finding  the best genre!
+
+
+
 	// TODO: Your code goes here
-    static int i = 0;
-    return (i++==0) ? 11 : 2;
 }

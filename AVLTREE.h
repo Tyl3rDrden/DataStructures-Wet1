@@ -176,6 +176,7 @@ private:
     //
     Node* m_root;
     int m_count;
+    Node* m_maxNode;
     //changed the root to be a pointer to a node that way it is interchangeable
 
     FUNCTOR m_RightIsBiggerThanLeft;
@@ -422,6 +423,16 @@ private:
         
 
     }
+    Node* getMaxNode(Node* CurrentNodePtr)
+    {
+        while (CurrentNodePtr->GetRightNodePtr())
+        {
+            CurrentNodePtr = CurrentNodePtr->GetRightNodePtr() ;
+        }
+        return CurrentNodePtr;
+        
+
+    }
     void RecursiveDelete(Node* currentNode)
     {
         if (m_root == SENTINELNODE)
@@ -448,6 +459,17 @@ private:
         // Finally, process left subtree
         FillArrayDescending(currentNode->GetLeftNodePtr(), array, currentIndex);
     }
+    Node* findLeftmost(Node* node)
+    {
+        if (node == nullptr)
+            return nullptr;
+
+        while (node->GetLeftNodePtr() != nullptr)
+            node = node->GetLeftNodePtr();
+
+        return node;
+    }
+
 public:
     KEY* GetKeysDescending()
     {
@@ -488,6 +510,7 @@ public:
         //Creating a Node from our data pointer
             //Node allocated on the heap!
         m_root = Insert(m_root, newNodePtr);
+        m_maxNode = getMaxNode(m_root);
         //Now call the recursive function the find the relevant position
 
     } //chec/k const place...
@@ -501,12 +524,22 @@ public:
         }
         return resultNodePtr->getElement();
     }
+    std::shared_ptr<T> FindandGetSharedPtr(const KEY& Keyvalue) 
+    {//Has to be const To not destroy structur
+        Node* resultNodePtr =  FindRecursive(m_root, Keyvalue);
+        if(!resultNodePtr)
+        {
+            throw ElementNotFound();
+        }
+        return resultNodePtr->m_DataPtr;
+    }
 
 
     void RemoveElement(const KEY& value)
     {
         m_count--;
         m_root = DeleteRecursive(m_root, value);
+        m_maxNode = getMaxNode(m_root);
     }
 
     bool ElementInTree(const KEY& Keyvalue)
@@ -521,13 +554,20 @@ public:
             return false;
         }
         return true;
-        
-
     }
 
     int getSize()
     {
         return m_count;
+    }
+    T& getMaxElement()
+    {
+        if(m_maxNode)
+        {
+            return m_maxNode->getElement();
+        }
+        throw std::runtime_error("No max Node");
+
     }
     
     //const std::shared_ptr<T> getDataPtr(const std::shared_ptr<KEY> key);

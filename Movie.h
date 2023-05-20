@@ -23,13 +23,12 @@ public:
         int m_numeberOfRatings; 
 
     public:
-        Statistics(int views, int id)
+        Statistics(int views =0, int id=0)
     : m_views(views), m_rating(0.0), m_id(id), m_sumRating(0), m_numeberOfRatings(0) {}
-
+        //Could be an issue here With The default value Its only here to fill and entirre Array
         int getViews() const;
         void setViews(int views);
         int getId() const;
-
         double getRating() const;
         void addRating(int rating);
         bool operator!=(const Statistics& other) const; // For my AVL TREE
@@ -44,9 +43,9 @@ private:
 
 public:
     Movie(int movieId, Genre genre, int views, bool vipOnly);
-
+    void IncrementViews(int amount);
     const int& getId() const;
-
+    void addRating(int rating);
     bool getVipOnly() const;
     void setVipOnly(bool vipOnly);
 

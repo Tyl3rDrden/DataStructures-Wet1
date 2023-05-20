@@ -1,16 +1,17 @@
 #include "Group.h"
+#include "User.h"
 
-
-Group::Group(int id) : m_id(id), m_vip(false) 
+Group::Group(int id) : m_id(id), m_vip(false) , m_vipCount(0)
 {
     for (int i = 0; i < NUMOFGENRES; i++)
     {
         m_genreViewCount[i] = 0;
+        m_genreSumViewCount[i] = 0;
     }
     
 }
 
-int Group::getId() const {
+const int& Group::getId() const {
     return m_id;
 }
 
@@ -19,7 +20,19 @@ void Group::setId(int id) {
 }
 
 bool Group::isVip() const {
-    return m_vip;
+    if(m_vipCount >0)
+    {
+        return true;
+    }
+    else if (m_vipCount == 0)
+    {
+        return false;
+    }
+    else
+    {
+        throw std::runtime_error("Negative Number of Vip in group");
+    }
+
 }
 void Group::incrementGenreCount(Genre genre)
 {
@@ -27,6 +40,7 @@ void Group::incrementGenreCount(Genre genre)
     {
         int genreNum = static_cast<int>(genre);
         m_genreViewCount[genreNum]++;
+        m_genreSumViewCount[genreNum]+= this->getSize();
     }
     else
     {
@@ -34,9 +48,18 @@ void Group::incrementGenreCount(Genre genre)
     }
 
 }
-
-void Group::setVip(bool vip) {
-    m_vip = vip;
+void Group::incrementSumGenreCount(Genre genre)
+{
+    if(genre != Genre::NONE)
+    {
+        int genreNum = static_cast<int>(genre);
+        m_genreSumViewCount[genreNum]++;
+    }
+    else
+    {
+        throw std::invalid_argument("None given to increment Genre In Group");
+    }
+    
 }
 
 int Group::getGenreViewCount(Genre genre) const
@@ -63,6 +86,7 @@ void Group::addUser(const std::shared_ptr<User> user)
         if(user->isVip())
         {
             m_vip = true;
+            m_vipCount++;
             //We are now a vip group
         }
         std::shared_ptr<User> shredptr(user);
@@ -83,8 +107,16 @@ void Group::deleteUser(int userId)
     {
         throw std::runtime_error("User not it group Can't be deleted");
     }
+    if(m_users.Find(userId).isVip())
+    {
+        m_vipCount--;
+    }
     m_users.RemoveElement(userId);
 
+}
+int Group::getSize() 
+{
+    return m_users.getSize();
 }
 
 Group::~Group()
@@ -95,6 +127,4 @@ Group::~Group()
     {
         m_users.Find(UsersIngroupId[i]).groupTerminated();
     }
-    delete[] m_genreViewCount;
-    
 }
