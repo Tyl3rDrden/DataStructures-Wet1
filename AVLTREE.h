@@ -37,139 +37,143 @@ private:
 
         //~~~~~`
         //Interface
-        public:
-            //Creates a general lead node! for general use!
-            //No children
-            Node(const std::shared_ptr<T> DataPtr, const KEY* KeyPtr): m_DataPtr(DataPtr),m_key(KeyPtr)
+    public:
+        //Creates a general lead node! for general use!
+        //No children
+        Node(const std::shared_ptr<T> DataPtr, const KEY* KeyPtr): m_DataPtr(DataPtr),m_key(KeyPtr)
+        {
+            if(!KeyPtr || !DataPtr)
             {
-                if(!KeyPtr || !DataPtr)
-                {
-                    throw std::invalid_argument("Bad Pointers Given");
+                throw std::invalid_argument("Bad Pointers Given");
 
-                }
-                m_leftNode = SENTINELNODE;
-                m_rightNode = SENTINELNODE;
-                m_height = 0;
-                //Creating a new leaf!
             }
-            Node(const Node& other):
+            m_leftNode = SENTINELNODE;
+            m_rightNode = SENTINELNODE;
+            m_height = 0;
+            //Creating a new leaf!
+        }
+        Node(const Node& other):
                 m_DataPtr(other.m_DataPtr),
                 m_key(other.m_key),
                 m_leftNode(other.m_leftNode),
                 m_rightNode(other.m_rightNode),
                 m_height(other.m_height)
-                    {}
-            //Maybe another contructor needed for
-            Node& operator=(const Node& other)
+        {}
+        //Maybe another contructor needed for
+        Node& operator=(const Node& other)
+        {
+            if (this != &other)
             {
-                if (this != &other)
-                {
-                    m_DataPtr = other.m_DataPtr;
-                    m_leftNode = other.m_leftNode;
-                    m_rightNode = other.m_rightNode;
-                    m_height = other.m_height;
-                }
-                return *this;
+                m_DataPtr = other.m_DataPtr;
+                m_leftNode = other.m_leftNode;
+                m_rightNode = other.m_rightNode;
+                m_height = other.m_height;
             }
-            //Assignment operator 
+            return *this;
+        }
+        //Assignment operator
 
 
-            Node& GetLeftNode() const 
-            {
-                assert(m_leftNode);
-                return *m_leftNode;
-            }
+        Node& GetLeftNode() const
+        {
+            assert(m_leftNode);
+            return *m_leftNode;
+        }
 
-            Node& GetRightNode() const
-            {
-                assert(m_rightNode);
-                return *m_rightNode;
-            }
-            
-            Node* GetRightNodePtr() const
-            {
-                return m_rightNode;
-            }
-            Node* GetLeftNodePtr() const
-            {
-                return m_leftNode;
-            }
-            void SetRightNodePtr(Node* newRightNodePtr)
-            {
-                m_rightNode = newRightNodePtr;
+        Node& GetRightNode() const
+        {
+            assert(m_rightNode);
+            return *m_rightNode;
+        }
 
-            }
-            void SetLeftNodePtr(Node* newLeftNodePtr)
+        Node* GetRightNodePtr() const
+        {
+            return m_rightNode;
+        }
+        Node* GetLeftNodePtr() const
+        {
+            if(!m_key)
             {
-                m_leftNode = newLeftNodePtr;
+                std::cout<<"Fucked";
             }
+            return m_leftNode;
+        }
+        void SetRightNodePtr(Node* newRightNodePtr)
+        {
+            m_rightNode = newRightNodePtr;
 
-            void SetElementPtr(std::shared_ptr<T> elementPtr)
-            {
-                m_DataPtr = elementPtr;
-            }
-            int getHeight() const
-            {
-                return m_height;
+        }
+        void SetLeftNodePtr(Node* newLeftNodePtr)
+        {
+            m_leftNode = newLeftNodePtr;
+        }
 
-            }
-            int getBalanceFactor() const
-            {
-                //Left Subtree height minus right
-                int leftheight = m_leftNode ? GetLeftNode().m_height : SENTINEL_NODE_HEIHGT ;
-                int rightheight = m_rightNode ? GetRightNode().m_height : SENTINEL_NODE_HEIHGT ;
-                return leftheight - rightheight;
+        void SetElementPtr(std::shared_ptr<T> elementPtr)
+        {
+            m_DataPtr = elementPtr;
+        }
+        int getHeight() const
+        {
+            return m_height;
+
+        }
+        int getBalanceFactor() const
+        {
+            //Left Subtree height minus right
+            int leftheight = m_leftNode ? GetLeftNode().m_height : SENTINEL_NODE_HEIHGT ;
+            int rightheight = m_rightNode ? GetRightNode().m_height : SENTINEL_NODE_HEIHGT ;
+            return leftheight - rightheight;
             //
-            }
-            void updateHeight()
-            {
-                //We'll use max on both the left and right heights then add one
-                int leftheight = m_leftNode ? GetLeftNode().m_height : SENTINEL_NODE_HEIHGT;
-                int rightheight = m_rightNode ? GetRightNode().m_height : SENTINEL_NODE_HEIHGT ;
-                m_height = std::max(leftheight, rightheight) +1;
-                //Using the recursive definition of the height!
-            }
-            std::shared_ptr<T> getElementPtr() const
-            {
-                return m_DataPtr;
-            }
-            T& getElement()
-            {
-                assert(m_DataPtr);
-                return *m_DataPtr;
-            }
-            const T& getElementConst() const
-            {
-                assert(m_DataPtr);
-                return *m_DataPtr;
-            }
+        }
+        void updateHeight()
+        {
+            //We'll use max on both the left and right heights then add one
+            int leftheight = m_leftNode ? GetLeftNode().m_height : SENTINEL_NODE_HEIHGT;
+            int rightheight = m_rightNode ? GetRightNode().m_height : SENTINEL_NODE_HEIHGT ;
+            m_height = std::max(leftheight, rightheight) +1;
+            //Using the recursive definition of the height!
+        }
+        std::shared_ptr<T> getElementPtr() const
+        {
+            return m_DataPtr;
+        }
+        T& getElement()
+        {
+            assert(m_DataPtr);
+            return *m_DataPtr;
+        }
+        const T& getElementConst() const
+        {
+            assert(m_DataPtr);
+            return *m_DataPtr;
+        }
 
-            void printNode() const 
+        void printNode() const
+        {
+            std::cout << "Node data: " << *m_DataPtr << std::endl;
+            std::cout << "Key Data: " << *m_key << std::endl;
+            std::cout << "Balance Factor: " << getBalanceFactor() << std::endl;
+            if(m_leftNode != SENTINELNODE)
             {
-                std::cout << "Node data: " << *m_DataPtr << std::endl;
-                std::cout << "Key Data: " << *m_key << std::endl;
-                std::cout << "Balance Factor: " << getBalanceFactor() << std::endl;
-                if(m_leftNode != SENTINELNODE) 
-                {
-                    std::cout << "Left Child data: " << *(m_leftNode->m_DataPtr) << std::endl;
-                }
-                else 
-                {
-                    std::cout << "No left child." << std::endl;
-                }
-                if(m_rightNode != SENTINELNODE) 
-                {
-                    std::cout << "Right Child data: " << *(m_rightNode->m_DataPtr) << std::endl;
-                }
-                else 
-                {
-                    std::cout << "No right child." << std::endl;
-                }
+                std::cout << "Left Child data: " << *(m_leftNode->m_DataPtr) << std::endl;
             }
-            const KEY& getKey()
+            else
             {
-                return *m_key;
+                std::cout << "No left child." << std::endl;
             }
+            if(m_rightNode != SENTINELNODE)
+            {
+                std::cout << "Right Child data: " << *(m_rightNode->m_DataPtr) << std::endl;
+            }
+            else
+            {
+                std::cout << "No right child." << std::endl;
+            }
+        }
+        const KEY& getKey()
+        {
+            return *m_key;
+        }
 
 
     };
@@ -180,7 +184,7 @@ private:
     //changed the root to be a pointer to a node that way it is interchangeable
 
     FUNCTOR m_RightIsBiggerThanLeft;
-    
+
     // LL rotation function
     Node* LLrotateByPtr(Node* root)
     {
@@ -281,18 +285,18 @@ private:
         return currentNodePtr;
     }
 
-    
+
     void swapElements(Node* node1, Node* node2)
     {
         if (node1 == nullptr || node2 == nullptr)
         {
             throw std::invalid_argument("Null node pointer passed to swapElements");
         }
-        
+
         node1->m_DataPtr.swap(node2->m_DataPtr);
         const KEY* tempkey = node2->m_key;
         node2->m_key = node1->m_key;
-        node1->m_key = tempkey; 
+        node1->m_key = tempkey;
     }
     Node* DeleteRecursive(Node* currentNode, const KEY& keyValue)
     {
@@ -332,7 +336,7 @@ private:
             }
             //Both Nodes Exist
             Node* minRightSubTreeNode = getMinNode(currentNode->GetRightNodePtr());
-           // std::cout << minRightSubTreeNode->getElementConst() <<"\n";
+            // std::cout << minRightSubTreeNode->getElementConst() <<"\n";
             swapElements(currentNode, minRightSubTreeNode);
             currentNode->SetRightNodePtr(DeleteRecursive(currentNode->GetRightNodePtr(), keyValue));
         }
@@ -392,7 +396,7 @@ private:
         // Process the left subtree
         printVisualHelper(node->GetLeftNodePtr(), depth);
     }
-    Node* FindRecursive(Node* currentNode, const KEY& keyValue) 
+    Node* FindRecursive(Node* currentNode, const KEY& keyValue)
     {
         if (!currentNode) {
             return nullptr; // Not found
@@ -415,27 +419,35 @@ private:
     }
     Node* getMinNode(Node* CurrentNodePtr)
     {
-        while (CurrentNodePtr->GetLeftNodePtr())
+        if(CurrentNodePtr)
         {
-            CurrentNodePtr = CurrentNodePtr->GetLeftNodePtr() ;
+            while (CurrentNodePtr->GetLeftNodePtr())
+            {
+                CurrentNodePtr = CurrentNodePtr->GetLeftNodePtr() ;
+            }
+            return CurrentNodePtr;
         }
-        return CurrentNodePtr;
-        
+
 
     }
     Node* getMaxNode(Node* CurrentNodePtr)
     {
-        while (CurrentNodePtr->GetRightNodePtr())
+        if(CurrentNodePtr)
         {
-            CurrentNodePtr = CurrentNodePtr->GetRightNodePtr() ;
+            while (CurrentNodePtr->GetRightNodePtr())
+            {
+                CurrentNodePtr = CurrentNodePtr->GetRightNodePtr() ;
+            }
+            return CurrentNodePtr;
+
         }
-        return CurrentNodePtr;
-        
+        return  NULL;
+
 
     }
     void RecursiveDelete(Node* currentNode)
     {
-        if (m_root == SENTINELNODE)
+        if (currentNode == SENTINELNODE)
         {
             return;
         }
@@ -469,6 +481,23 @@ private:
 
         return node;
     }
+    void FillArrayDataDecending(Node* currentNode, T** &array, int &currentIndex)
+    {
+        if (currentNode == nullptr) {
+            return;
+        }
+
+        // First, process right subtree
+        FillArrayDataDecending(currentNode->GetRightNodePtr(), array, currentIndex);
+
+        // Then, save current node's key
+        array[currentIndex] = (currentNode->getElementPtr()).get();
+        currentIndex++;
+
+        // Finally, process left subtree
+        FillArrayDataDecending(currentNode->GetLeftNodePtr(), array, currentIndex);
+
+    }
 
 public:
     KEY* GetKeysDescending()
@@ -482,12 +511,24 @@ public:
         FillArrayDescending(m_root, keysArray, currentIndex);
         return keysArray;
     }
+    T** GetDataPtrsDescending()
+    {
+        if (m_count == 0) {
+            return nullptr; // Tree is empty
+        }
+
+        T** DataPtrArray = new T*[m_count]; // Array to store keys
+        int currentIndex = 0; // Starting index
+        FillArrayDataDecending(m_root, DataPtrArray, currentIndex);
+        return DataPtrArray;
+    }
+
     AVLTREE(): m_root(SENTINELNODE), m_count(0)
     {
         FUNCTOR RightIsBiggerThanLeft;
         //Initializes an instance of the Functor
         m_RightIsBiggerThanLeft = RightIsBiggerThanLeft;
-        
+
 
     }
     //Creates an empty tree!
@@ -495,7 +536,7 @@ public:
     {
         printVisualHelper(m_root, 0);
     }
-    
+
     void InsertElement(std::shared_ptr<T> dataPtr, const KEY* KeyPtr)
     {
         if(!dataPtr.get() || !KeyPtr)
@@ -508,14 +549,14 @@ public:
         //newNodePtr->printNode();
         //std::cout << newNodePtr->getElement() << "  " << newNodePtr->getKey();
         //Creating a Node from our data pointer
-            //Node allocated on the heap!
+        //Node allocated on the heap!
         m_root = Insert(m_root, newNodePtr);
         m_maxNode = getMaxNode(m_root);
         //Now call the recursive function the find the relevant position
 
     } //chec/k const place...
 
-    T& Find(const KEY& Keyvalue) 
+    T& Find(const KEY& Keyvalue)
     {//Has to be const To not destroy structur
         Node* resultNodePtr =  FindRecursive(m_root, Keyvalue);
         if(!resultNodePtr)
@@ -524,7 +565,7 @@ public:
         }
         return resultNodePtr->getElement();
     }
-    std::shared_ptr<T> FindandGetSharedPtr(const KEY& Keyvalue) 
+    std::shared_ptr<T> FindandGetSharedPtr(const KEY& Keyvalue)
     {//Has to be const To not destroy structur
         Node* resultNodePtr =  FindRecursive(m_root, Keyvalue);
         if(!resultNodePtr)
@@ -539,7 +580,15 @@ public:
     {
         m_count--;
         m_root = DeleteRecursive(m_root, value);
-        m_maxNode = getMaxNode(m_root);
+        if(m_count)
+        {
+            m_maxNode = getMaxNode(m_root);
+
+        }
+        else
+        {
+            m_maxNode = nullptr;
+        }
     }
 
     bool ElementInTree(const KEY& Keyvalue)
@@ -569,7 +618,7 @@ public:
         throw std::runtime_error("No max Node");
 
     }
-    
+
     //const std::shared_ptr<T> getDataPtr(const std::shared_ptr<KEY> key);
 
     //I think the syntas is correct
@@ -578,10 +627,10 @@ public:
         RecursiveDelete(m_root);
     }
 
-        //Recursivly dealloc all nodes
+    //Recursivly dealloc all nodes
 
 
-        //We used normal pointers need to recursivly dealloc all Nodes
-    
+    //We used normal pointers need to recursivly dealloc all Nodes
+
 };
 #endif

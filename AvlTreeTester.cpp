@@ -62,6 +62,14 @@ int main() {
     tree.printVisual();
     //tree.RemoveElement(2);
     std::cout << tree.getMaxElement();
+    std::cout << "_________________________";
+
+    int** decendingDatasByKeys = tree.GetDataPtrsDescending();
+    for (int i = 0; i < tree.getSize(); i++)
+    {
+        std::cout << *decendingDatasByKeys[i] << " ";
+    }
+    
     //tree.InsertElement(std::make_shared<int>(40));
     return 0;
 }

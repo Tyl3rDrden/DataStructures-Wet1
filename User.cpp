@@ -2,16 +2,17 @@
 #include "Group.h"
 
 User::User(int id, bool vip) : m_groupPtr(nullptr)
-    , m_id(id), m_vip(vip) 
+        , m_id(id), m_vip(vip)
+{
+    for (int i = 0; i < NUMOFGENRES; i++)
     {
-            for (int i = 0; i < NUMOFGENRES; i++)
-            {
-                m_genreViewCount[i] = 0;
-            }
+        m_preGroupViewCount[i] = 0;
+        m_genreViewCount[i] = 0;
     }
+}
 
 const int& User::getId() const
-{   
+{
     return m_id;
 }
 
@@ -49,8 +50,8 @@ void User::joinGroup(Group* groupPtr)
         //Changing the Pre Group view count
         for (int i = 0; i < NUMOFGENRES; i++)
         {
-            m_genreViewCount[i] = groupPtr->getGenreViewCount(static_cast<Genre>(i));
-        } 
+            m_preGroupViewCount[i] = groupPtr->getGenreViewCount(static_cast<Genre>(i));
+        }
     }
     else
     {
@@ -69,12 +70,12 @@ int User::getViewsFromGroup(Genre genre)
     {//increment View count From Group
         //Summing current view count
         ViewsFromGroup += m_groupPtr->getGenreViewCount(genre);
-        //Deducting the join time views 
+        //Deducting the join time views
         ViewsFromGroup -= m_preGroupViewCount[genreNum];
     }
     return ViewsFromGroup;
 
-    
+
 }
 
 int User::getNumGenreViews(Genre genre)
@@ -85,7 +86,7 @@ int User::getNumGenreViews(Genre genre)
     }
     int genreNum  = static_cast<int>(genre);
     return m_genreViewCount[genreNum] + getViewsFromGroup(genre);
-    //Adding personal views to the Group Watched; 
+    //Adding personal views to the Group Watched;
 
 }
 
@@ -99,7 +100,7 @@ void User::groupTerminated()
 
     for (int i = 0; i < NUMOFGENRES; i++)
     {
-        m_genreViewCount[i] += getViewsFromGroup(static_cast<Genre>(i));
+        m_genreViewCount[i] += (getViewsFromGroup(static_cast<Genre>(i)) - m_preGroupViewCount[i]);
     }
     //Now setting the preGroupJoin View count to 0
     for (int i = 0; i < NUMOFGENRES; i++)
@@ -108,7 +109,7 @@ void User::groupTerminated()
     }
     //Setting pointer to group to nullptr
     this->m_groupPtr = nullptr;
-    
+
 
 
 }

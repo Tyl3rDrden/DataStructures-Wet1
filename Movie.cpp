@@ -1,7 +1,9 @@
-#include "Movie.h"
+//
+// Created by jonat on 5/20/2023.
+//
 
-Movie::Statistics::Statistics(int views, int id)
-    : m_views(views), m_rating(0.0), m_id(id), m_sumRating(0), m_numeberOfRatings(0) {}
+#include "Movie.h"
+#include "Movie.h"
 
 int Movie::Statistics::getViews() const
 {
@@ -39,7 +41,7 @@ bool Movie::Statistics::operator!=(const Statistics& other) const
 
 }
 Movie::Movie(int movieId, Genre genre, int views, bool vipOnly)
-    : m_id(movieId), m_vipOnly(vipOnly), m_genre(genre), m_statistics(views, movieId) {}
+        : m_id(movieId), m_vipOnly(vipOnly), m_genre(genre), m_statistics(views, movieId) {}
 
 const int& Movie::getId() const
 {
